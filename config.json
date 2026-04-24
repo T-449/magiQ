@@ -1,0 +1,27 @@
+{
+    "algorithms": {
+        "xmss": "XMSS-SHA2_10_256",
+        "mldsa": "ML-DSA-65",
+        "hash": "sha256",
+        "kex": "X25519MLKEM768",
+        "cipher_suite": "TLS_AES_256_GCM_SHA384"
+    },
+    "provider": {
+        "name": "QuantumTrustProvider",
+        "host": "127.0.0.1",
+        "port": 4433
+    },
+    "ca": {
+        "name": "PQ-RootCA"
+    },
+    "paths": {
+        "data_users": "data/users",
+        "data_agents": "data/agents",
+        "data_policies": "data/policies",
+        "keys": "keys",
+        "certs": "certs",
+        "registries": "registries"
+    },
+    "debug": true,
+    "_NOTE": "XMSS-SHA2_16_256 ~30s | XMSS-SHA2_16_256 ~10min per keygen"
+}
