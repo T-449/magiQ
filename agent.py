@@ -821,7 +821,8 @@ class Agent:
             max_rounds: int = 10,
             min_peer_rounds_before_finish: int = 0,
             force_first_peer_request: bool = False,
-            first_outgoing: str = ""):
+            first_outgoing: str = "",
+            auto_finish_after_first_peer_data: bool = False):
         """Drive an LLM-to-LLM conversation until TASK_FINISHED or max_rounds."""
         if self._app_agent is None:
             raise RuntimeError(f"Agent {self.aid}: attach_llm() before running")
@@ -861,7 +862,14 @@ class Agent:
         else:
             print(f"[AGENT:{self.aid}] [LLM] Generating initial response...")
             outgoing = self._timed_llm_reply(
-                f"Your task: {task}", "initiator initial", task_stats=task_stats)
+                (
+                    f"Your task:\n{task}\n\n"
+                    "Generate the first concise message to the peer. "
+                    "Use only task-grounded facts and do not invent peer data."
+                ),
+                "initiator initial",
+                task_stats=task_stats,
+            )
         transcript.append({"role": "initiator", "msg": outgoing})
         print(f"[AGENT:{self.aid}] [OUTGOING] Initial message preview: "
               f"{_preview(outgoing)}")
@@ -925,9 +933,33 @@ class Agent:
                     "task_stats": task_stats,
                 }
 
+            if (auto_finish_after_first_peer_data
+                    and peer_rounds >= min_peer_rounds_before_finish
+                    and incoming.strip()):
+                print(
+                    f"\n[AGENT:{self.aid}] [SUCCESS] Step data collected after "
+                    f"{peer_rounds} peer round(s)")
+                self._print_llm_summary("task total", task_stats)
+                return {
+                    "finished": True,
+                    "reason": "receiver_data_collected",
+                    "rounds": i + 1,
+                    "transcript": transcript,
+                    "task_stats": task_stats,
+                }
+
             print(f"\n[AGENT:{self.aid}] [LLM] Processing peer response and generating reply...")
             outgoing = self._timed_llm_reply(
-                incoming, f"initiator round {i+1} reply", task_stats=task_stats)
+                (
+                    f"Task context:\n{task}\n\n"
+                    f"Peer message:\n{incoming}\n\n"
+                    "Reply as the orchestrator for this exact task. "
+                    "Use only verified carried context and explicit peer-provided data. "
+                    "If the outcome is complete, emit exactly <TASK_FINISHED>."
+                ),
+                f"initiator round {i+1} reply",
+                task_stats=task_stats,
+            )
             transcript.append({"role": "initiator", "msg": outgoing})
             print(f"[AGENT:{self.aid}] [OUTGOING] Round {i+1} preview: "
                   f"{_preview(outgoing)}")

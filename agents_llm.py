@@ -20,6 +20,8 @@ from autogen_agentchat.messages import TextMessage
 from autogen_core import CancellationToken
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
+from lib.common import ROOT_DIR
+
 
 TASK_FINISHED = "<TASK_FINISHED>"
 
@@ -135,6 +137,8 @@ def _calendar_tools(user_email: str, model_client=None):
 
 def _email_tools(user_email: str, model_client=None):
     outbox: List[dict] = []
+    reports_dir = os.path.join(ROOT_DIR, "data")
+    os.makedirs(reports_dir, exist_ok=True)
 
     def check_inbox() -> str:
         """Return expense-related emails from this user's inbox for the recent NeurIPS trip."""
@@ -158,15 +162,27 @@ def _email_tools(user_email: str, model_client=None):
     def submit_expense_report(trip: str, total: float,
                               items: str, participants: str) -> str:
         """Submit a combined expense report for a trip."""
-        return (f"Expense report for '{trip}' submitted successfully. "
-                f"Total: ${total:.2f}. Items: {items}. "
-                f"Participants listed: {participants}.")
+        filename = "MA_NeurIPS_Expense_Report.txt"
+        path = os.path.join(reports_dir, filename)
+        report = (
+            f"Trip: {trip}\n"
+            f"Participants: {participants}\n"
+            f"Total: ${total:.2f}\n"
+            f"Items:\n{items}\n"
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(report)
+        return (
+            f"Expense report for '{trip}' submitted successfully. "
+            f"Total: ${total:.2f}. Saved to {filename}."
+        )
 
     return [check_inbox, send_email, submit_expense_report]
 
 
 def _writing_tools(user_email: str, model_client=None):
     docs: dict = {}
+    docs_dir = ROOT_DIR
 
     def read_blog_posts() -> str:
         """Return existing blog posts associated with this user on AI and privacy."""
@@ -182,7 +198,11 @@ def _writing_tools(user_email: str, model_client=None):
     def create_document(title: str, content: str) -> str:
         """Create or overwrite a document by title."""
         docs[title] = content
-        return f"Document '{title}' saved ({len(content)} chars)"
+        safe_title = os.path.basename(title)
+        path = os.path.join(docs_dir, safe_title)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return f"Document '{safe_title}' saved ({len(content)} chars)"
 
     def list_documents() -> str:
         """List all documents created so far."""

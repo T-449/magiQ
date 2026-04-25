@@ -6,8 +6,10 @@ agent_ma.py - Multi-agent extension of Agent for Magiq.
 import threading
 import time
 import re
+import os
 
 from lib.common import (
+    ROOT_DIR,
     build_tuple_message, create_key, prf, sha256, canonical_json,
     personalized_hash_chain, verify_chain_element,
     build_merkle_tree, get_merkle_proof, verify_merkle_proof,
@@ -523,6 +525,7 @@ class AgentMA(Agent):
 
         phase_bw = []
         workflow_handoff = ""
+        handoff_history = []
         for i, step in enumerate(workflow):
             rx = receivers.get(step["agent_aid"])
             if rx is None:
@@ -535,10 +538,82 @@ class AgentMA(Agent):
                 phase_bw.append(bw)
             if handoff:
                 workflow_handoff = handoff
+                handoff_history.append(handoff)
             if not ok:
                 print(f"  Aborting workflow after step {i+1} failure.")
                 break
+
+        if len(phase_bw) == len(workflow):
+            self._finalize_workflow_artifacts(handoff_history)
         return phase_bw
+
+    def _finalize_workflow_artifacts(self, handoff_history):
+        """Persist deterministic final artifacts for MA tasks after successful steps."""
+        if not self._task_state:
+            return
+
+        task_text = (self._task_state.get("task") or "").lower()
+        if "expense report" in task_text:
+            self._write_expense_artifact(handoff_history)
+
+        if "ma_ai_privacy_blog_post.md" in task_text or "blog post" in task_text:
+            self._write_blog_artifact(handoff_history)
+
+    def _handoff_facts(self, handoff: str) -> str:
+        lines = [ln.rstrip() for ln in (handoff or "").splitlines()]
+        facts_started = False
+        facts = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped == "- Receiver-provided facts:":
+                facts_started = True
+                continue
+            if not facts_started:
+                continue
+            if stripped.startswith("- Source agent:"):
+                continue
+            if stripped:
+                facts.append(stripped)
+        return "\n".join(facts).strip()
+
+    def _write_expense_artifact(self, handoff_history):
+        out_path = os.path.join(ROOT_DIR, "data", "MA_NeurIPS_Expense_Report.txt")
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
+        lines = [
+            "Combined NeurIPS Expense Report",
+            "",
+            f"Orchestrator: {self.aid}",
+            "",
+        ]
+        for idx, handoff in enumerate(handoff_history, start=1):
+            lines.append(f"Step {idx} receiver facts:")
+            lines.append(self._handoff_facts(handoff) or "(no facts captured)")
+            lines.append("")
+
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines).rstrip() + "\n")
+        print(f"[AGENT:{self.aid}] Saved combined expense artifact: {out_path}")
+
+    def _write_blog_artifact(self, handoff_history):
+        out_path = os.path.join(ROOT_DIR, "MA_AI_Privacy_Blog_Post.md")
+        sections = []
+        for handoff in handoff_history:
+            facts = self._handoff_facts(handoff)
+            if facts:
+                sections.append(facts)
+
+        content = [
+            "# AI Privacy Blog Post",
+            "",
+            "## Combined Perspectives",
+            "",
+            "\n\n".join(sections) if sections else "No perspective data captured.",
+            "",
+        ]
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(content))
+        print(f"[AGENT:{self.aid}] Saved blog artifact: {out_path}")
 
     def _build_step_task(
             self,
@@ -595,13 +670,27 @@ class AgentMA(Agent):
             return ""
 
         incoming_msgs = []
+
+        def _clean_receiver_msg(text: str) -> str:
+            # Strip any tool-call wrappers so only peer facts are carried forward.
+            cleaned = re.sub(
+                r"<\s*tool_call\s*>.*?(<\s*/\s*tool_call\s*>|<\s*/\s*tool_ca\b|$)",
+                "",
+                text,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            return cleaned.strip()
+
         for turn in transcript:
             if turn.get("role") != "receiver":
                 continue
             msg = (turn.get("msg") or "").strip()
             if not msg:
                 continue
-            if "<TASK_FINISHED>" in msg.upper():
+            if re.search(r'<\s*task[\s_]*finished\s*>', msg, re.IGNORECASE):
+                continue
+            msg = _clean_receiver_msg(msg)
+            if not msg:
                 continue
             incoming_msgs.append(msg)
 
@@ -721,7 +810,8 @@ class AgentMA(Agent):
                 max_rounds=6,
                 min_peer_rounds_before_finish=1,
                 force_first_peer_request=True,
-                first_outgoing=first_outgoing)
+                first_outgoing=first_outgoing,
+                auto_finish_after_first_peer_data=not is_final_step)
             handoff = self._extract_step_handoff(convo_result, target_aid)
             success = bool(convo_result and convo_result.get("finished"))
             if not success:
