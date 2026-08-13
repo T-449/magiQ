@@ -1,0 +1,14 @@
+{
+  "uid": "dave@domain.com",
+  "password": "dave-pass",
+  "agents": [
+    {
+      "name": "agent-epsilon",
+      "device": "dave-workstation",
+      "ip": "127.0.0.1",
+      "port": 6105,
+      "tool": "all",
+      "policy_file": "dave_agent-epsilon_policy.json"
+    }
+  ]
+}

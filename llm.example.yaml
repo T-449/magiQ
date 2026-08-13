@@ -1,0 +1,22 @@
+# Copy to llm.yaml and point it at your endpoint.
+# setup.sh does this for you if llm.yaml does not already exist.
+#
+# api_key may be set here directly, or left out so that the environment
+# variable named by api_key_env is used instead.
+
+model: gpt-4o-mini
+base_url: https://api.openai.com/v1
+api_key_env: OPENAI_API_KEY
+
+# Local OpenAI-compatible server (vLLM, Ollama, LM Studio) instead:
+#
+# model: Qwen/Qwen3-30B-A3B-Instruct
+# base_url: http://localhost:8000/v1
+# api_key: EMPTY
+# model_info:
+#   vision: false
+#   function_calling: true
+#   json_output: true
+#   structured_output: true
+#   multiple_system_messages: true
+#   family: qwen

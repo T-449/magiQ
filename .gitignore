@@ -1,0 +1,38 @@
+# Build output and environments
+.venv/
+.build/
+activate.sh
+lib/libxmss_helper.so
+lib/libxmss_helper.dylib
+openssl_pq.cnf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Secrets and local configuration
+.env
+llm.yaml
+
+# Runtime-generated protocol state
+certs/
+keys/
+registries/
+
+# Demo output. Document titles come from the model, so the whole
+# directory is ignored rather than a filename pattern.
+output/
+*.log
+
+# Evaluation output
+evaluation/table1*.json
+evaluation/bw_results.json
+evaluation/plots/*.pdf
+evaluation/plots/*.png
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+*.swp

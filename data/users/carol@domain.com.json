@@ -1,0 +1,14 @@
+{
+  "uid": "carol@domain.com",
+  "password": "carol-pass",
+  "agents": [
+    {
+      "name": "agent-delta",
+      "device": "carol-workstation",
+      "ip": "127.0.0.1",
+      "port": 6104,
+      "tool": "all",
+      "policy_file": "carol_agent-delta_policy.json"
+    }
+  ]
+}

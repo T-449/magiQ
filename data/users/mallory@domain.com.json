@@ -1,0 +1,14 @@
+{
+  "uid": "mallory@domain.com",
+  "password": "mallory-pass",
+  "agents": [
+    {
+      "name": "agent-gamma",
+      "device": "mallory-workstation",
+      "ip": "127.0.0.1",
+      "port": 6103,
+      "tool": "all",
+      "policy_file": "mallory_agent-gamma_policy.json"
+    }
+  ]
+}

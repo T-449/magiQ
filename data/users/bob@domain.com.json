@@ -1,0 +1,14 @@
+{
+  "uid": "bob@domain.com",
+  "password": "bob-pass",
+  "agents": [
+    {
+      "name": "agent-beta",
+      "device": "bob-workstation",
+      "ip": "127.0.0.1",
+      "port": 6102,
+      "tool": "all",
+      "policy_file": "bob_agent-beta_policy.json"
+    }
+  ]
+}

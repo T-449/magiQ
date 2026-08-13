@@ -1,0 +1,70 @@
+{
+  "expiry": "2099-01-01T00:00:00Z",
+  "allowed_contacts": [
+    {
+      "peer_aid": "alice@domain.com:agent-alpha",
+      "Q": 20
+    },
+    {
+      "peer_aid": "bob@domain.com:agent-beta",
+      "Q": 20
+    },
+    {
+      "peer_aid": "mallory@domain.com:agent-gamma",
+      "Q": 20
+    },
+    {
+      "peer_aid": "carol@domain.com:agent-delta",
+      "Q": 20
+    },
+    {
+      "peer_aid": "dave@domain.com:agent-epsilon",
+      "Q": 20
+    }
+  ],
+  "icp": {
+    "m": 5,
+    "n_prime": 20,
+    "Q_tot": 100,
+    "delta_tot_sec": 9000,
+    "allowed_contacts": [
+      {
+        "peer_aid": "alice@domain.com:agent-alpha"
+      },
+      {
+        "peer_aid": "bob@domain.com:agent-beta"
+      },
+      {
+        "peer_aid": "mallory@domain.com:agent-gamma"
+      },
+      {
+        "peer_aid": "carol@domain.com:agent-delta"
+      },
+      {
+        "peer_aid": "dave@domain.com:agent-epsilon"
+      }
+    ]
+  },
+  "rcp": {
+    "Q": 20,
+    "delta_sec": 3600,
+    "expiry": "2099-01-01T00:00:00Z",
+    "allowed_contacts": [
+      {
+        "peer_aid": "alice@domain.com:agent-alpha"
+      },
+      {
+        "peer_aid": "bob@domain.com:agent-beta"
+      },
+      {
+        "peer_aid": "mallory@domain.com:agent-gamma"
+      },
+      {
+        "peer_aid": "carol@domain.com:agent-delta"
+      },
+      {
+        "peer_aid": "dave@domain.com:agent-epsilon"
+      }
+    ]
+  }
+}

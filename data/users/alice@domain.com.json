@@ -1,0 +1,14 @@
+{
+  "uid": "alice@domain.com",
+  "password": "alice-pass",
+  "agents": [
+    {
+      "name": "agent-alpha",
+      "device": "alice-workstation",
+      "ip": "127.0.0.1",
+      "port": 6101,
+      "tool": "all",
+      "policy_file": "alice_agent-alpha_policy.json"
+    }
+  ]
+}

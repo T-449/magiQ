@@ -1,0 +1,14 @@
+{
+  "uid": "erin@domain.com",
+  "password": "erin-pass",
+  "agents": [
+    {
+      "name": "agent-zeta",
+      "device": "erin-workstation",
+      "ip": "127.0.0.1",
+      "port": 6106,
+      "tool": "all",
+      "policy_file": "erin_agent-zeta_policy.json"
+    }
+  ]
+}
